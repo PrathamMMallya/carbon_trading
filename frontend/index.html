@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Carbon Price Forecast</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <h2>Carbon Price Forecasting</h2>
+
+  <label>Select Date</label>
+  <input type="date" id="date">
+
+  <label>Mode</label>
+  <select id="mode" onchange="toggleModel()">
+    <option value="manual">Manual</option>
+    <option value="auto">Auto Select</option>
+  </select>
+
+  <div id="modelDiv">
+    <label>Model</label>
+    <select id="model">
+      <option value="arima">ARIMA</option>
+      <option value="prophet">Prophet</option>
+      <option value="rf">Random Forest</option>
+    </select>
+  </div>
+
+  <button onclick="predict()">Predict</button>
+
+  <pre id="output"></pre>
+</div>
+
+<script>
+function toggleModel() {
+  const mode = document.getElementById("mode").value;
+  document.getElementById("modelDiv").style.display =
+    mode === "auto" ? "none" : "block";
+}
+
+function predict() {
+  const payload = {
+    date: document.getElementById("date").value,
+    mode: document.getElementById("mode").value,
+    model: document.getElementById("model").value
+  };
+
+  fetch("/predict", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("output").textContent =
+      JSON.stringify(data, null, 2);
+  });
+}
+</script>
+
+</body>
+</html>
