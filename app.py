@@ -1,6 +1,4 @@
-# ================================================================
-# app.py — Carbon Price Forecasting Inference (PRODUCTION FULL TELEMETRY)
-# ================================================================
+# this one is app.py — Carbon Price Forecasting Inference 
 
 from comet_ml import Experiment
 import mlflow
@@ -13,10 +11,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
 
-# ---------------- Flask ----------------
+#  Flask part 
 app = Flask(__name__, template_folder="frontend")
 
-# ---------------- Paths ----------------
+# all paths i have put here
 ARTIFACT_DIR = "artifacts"
 HISTORY_FILE = f"{ARTIFACT_DIR}/inference_history.csv"
 PLOT_FILE = f"{ARTIFACT_DIR}/forecast_plot.png"
@@ -24,11 +22,11 @@ SYS_PLOT_FILE = f"{ARTIFACT_DIR}/system_model_plot.png"
 FEATURE_PLOT_FILE = f"{ARTIFACT_DIR}/feature_importance.png"
 os.makedirs(ARTIFACT_DIR, exist_ok=True)
 
-# ---------------- MLflow ----------------
+# MLflow part
 mlflow.set_tracking_uri("file:./mlruns")
 mlflow.set_experiment("Carbon_Forecasting_Inference")
 
-# ---------------- Comet ----------------
+#  Comet is here
 with open("./comet-config/comet.json") as f:
     comet_cfg = json.load(f)
 
@@ -46,14 +44,14 @@ wandb.init(
     reinit=True
 )
 
-# ---------------- Load Models ----------------
+#  Load Models (i removed sarimax)
 MODELS = {
     "arima": joblib.load("models/arima.pkl"),
     "prophet": joblib.load("models/prophet.pkl"),
     "rf": joblib.load("models/rf.pkl")
 }
 
-# ---------------- Utilities ----------------
+#  Utilities common to all
 def system_stats():
     return psutil.cpu_percent(), psutil.virtual_memory().percent
 
@@ -64,7 +62,7 @@ def auto_select_model():
 def clamp_preds(preds, low=25, high=28):
     return [max(low, min(high, float(p))) for p in preds]
 
-# ---------------- Plot Functions ----------------
+# function plotting
 def generate_forecast_plot(df_hist):
     plt.figure(figsize=(8, 5))
     for label, grp in df_hist.groupby("run_label"):
@@ -103,7 +101,7 @@ def generate_rf_feature_plot(model):
         plt.savefig(FEATURE_PLOT_FILE)
         plt.close()
 
-# ---------------- Routes ----------------
+# routing 
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -121,7 +119,7 @@ def predict():
     run_label = f"{model_name}_{datetime.now().strftime('%H:%M:%S')}"
 
     with mlflow.start_run(run_name=f"Inference_{model_name}"):
-        # ---------------- Prediction ----------------
+        # this is main prediction
         if model_name == "arima":
             preds = model.forecast(steps=5).tolist()
         elif model_name == "prophet":
@@ -147,7 +145,7 @@ def predict():
 
         preds = clamp_preds(preds)
 
-        # ---------------- History Management ----------------
+        # History Management is here
         hist = pd.DataFrame({
             "run_label": run_label,
             "step": range(1,6),
@@ -156,7 +154,7 @@ def predict():
             "RAM": [ram]*5
         })
 
-        # Safe CSV load
+        
         if os.path.exists(HISTORY_FILE):
             try:
                 df_hist = pd.read_csv(HISTORY_FILE)
@@ -177,24 +175,24 @@ def predict():
 
         df_hist.to_csv(HISTORY_FILE, index=False)
 
-        # ---------------- Generate Plots ----------------
+        #  Generate Plots 
         generate_forecast_plot(df_hist)
         generate_system_model_plot(df_hist)
 
-        # ---------------- MLflow Logging ----------------
+        # MLflow Logging is here 
         mlflow.log_param("model_used", model_name)
         mlflow.log_metrics({"CPU": cpu, "RAM": ram})
         mlflow.log_artifact(PLOT_FILE)
         mlflow.log_artifact(SYS_PLOT_FILE)
 
-        # ---------------- Comet Logging ----------------
+        # Comet Logging is here
         experiment.log_parameter("Model", model_name)
         experiment.log_metric("CPU_Usage", cpu)
         experiment.log_metric("RAM_Usage", ram)
         experiment.log_image(PLOT_FILE, name="Forecast_Comparison")
         experiment.log_image(SYS_PLOT_FILE, name="System_Metrics_Comparison")
 
-        # ---------------- W&B Logging ----------------
+        #  W&B Logging is this
         wandb.log({
             "CPU_Usage_%": cpu,
             "RAM_Usage_%": ram,
@@ -209,6 +207,6 @@ def predict():
         "next_5_predictions": preds
     })
 
-# ---------------- Windows Safe ----------------
+#I have kept it Windows safe
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
