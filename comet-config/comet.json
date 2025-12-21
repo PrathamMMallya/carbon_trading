@@ -1,5 +1,5 @@
 {
-  "api_key": "add your api key here , this going to comet website",
+  "api_key": "add your api key here , for this go to comet website",
   "project_name": "carbon-price-forecasting",
   "workspace": " mlops-carbon"
 }
