@@ -1,6 +1,5 @@
-# ================================================================
-# train_arima.py — ARIMA + MLflow + Comet + WandB (FULL VERSION)
-# ================================================================
+# train_arima.py this is having ARIMA + MLflow + Comet + WandB (FULL VERSION) 
+
 
 import pandas as pd
 import numpy as np
@@ -17,9 +16,8 @@ import time
 from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
-# ================================================================
-# --------------------------- COMET ML ----------------------------
-# ================================================================
+# this is comet part
+
 from comet_ml import Experiment
 
 with open("../comet-config/comet.json", "r") as f:
@@ -31,9 +29,8 @@ experiment = Experiment(
     workspace=comet_cfg["workspace"]
 )
 
-# ================================================================
-# --------------------------- WAND.B ------------------------------
-# ================================================================
+# this one is for wandb-
+
 import wandb
 wandb.init(
     project="carbon-price-forecasting",
@@ -41,16 +38,11 @@ wandb.init(
     config={"model": "ARIMA"}
 )
 
-# ================================================================
-# --------------------------- MLFLOW ------------------------------
-# ================================================================
+# ml flow 
 import mlflow
 mlflow.set_tracking_uri("file:../mlruns")
 mlflow.set_experiment("Carbon_Forecasting_ARIMA")
 
-# ================================================================
-# ------------------------- LOAD DATASET --------------------------
-# ================================================================
 file_path = "../data/carbon_trading_dataset.csv"
 df = pd.read_csv(file_path)
 
@@ -69,35 +61,31 @@ split = int(len(df) * 0.8)
 train, test = df.iloc[:split], df.iloc[split:]
 y_train, y_test = train[target], test[target]
 
-# ================================================================
-# ---------------------------- METRICS ----------------------------
-# ================================================================
+# for metrics... 
 def calculate_metrics(true, pred):
     rmse = np.sqrt(mean_squared_error(true, pred))
     mae = mean_absolute_error(true, pred)
     mse = mean_squared_error(true, pred)
     return rmse, mae, mse
 
-# ================================================================
-# ----------------------------- TRAIN -----------------------------
-# ================================================================
+# for training
 p, d, q = 2, 1, 2
 
 with mlflow.start_run(run_name="ARIMA"):
 
-    # -------- Train Model --------
+    # Train Model
     model = ARIMA(y_train, order=(p, d, q)).fit()
 
-    # -------- Forecast --------
+    #  Forecast 
     y_pred = model.forecast(len(test))
     rmse, mae, mse = calculate_metrics(y_test, y_pred)
 
-    # -------- Log Parameters --------
+    # Log Parameters
     mlflow.log_params({"p": p, "d": d, "q": q})
     experiment.log_parameters({"p": p, "d": d, "q": q})
     wandb.config.update({"p": p, "d": d, "q": q})
 
-    # -------- Log Final Metrics --------
+    # Log Final Metrics
     mlflow.log_metrics({"RMSE": rmse, "MAE": mae, "MSE": mse})
     experiment.log_metrics({"RMSE": rmse, "MAE": mae, "MSE": mse})
     wandb.log({
@@ -106,9 +94,7 @@ with mlflow.start_run(run_name="ARIMA"):
         "Final_MSE": mse
     })
 
-    # ============================================================
-    # ---- STEP-WISE METRICS OVER TIME (GRAPHS) ------------------
-    # ============================================================
+    # this is STEP-WISE METRICS OVER TIME (GRAPHS) 
     for i in range(1, len(y_pred) + 1):
         rmse_i, mae_i, mse_i = calculate_metrics(
             y_test.iloc[:i],
@@ -125,9 +111,7 @@ with mlflow.start_run(run_name="ARIMA"):
         experiment.log_metric("MAE_over_time", mae_i, step=i)
         experiment.log_metric("MSE_over_time", mse_i, step=i)
 
-    # ============================================================
-    # -------- SYSTEM RESOURCE UTILIZATION -----------------------
-    # ============================================================
+    #  SYSTEM RESOURCE UTILIZATION is this
     for step in range(20):
         cpu = psutil.cpu_percent(interval=0.1)
         ram = psutil.virtual_memory().percent
@@ -142,9 +126,7 @@ with mlflow.start_run(run_name="ARIMA"):
 
         time.sleep(0.4)
 
-    # ============================================================
-    # ------------------------ SAVE MODEL -------------------------
-    # ============================================================
+
     MODEL_DIR = r"C:\Users\prath\Downloads\MLOps_Backend\models"
     os.makedirs(MODEL_DIR, exist_ok=True)
 
@@ -152,9 +134,7 @@ with mlflow.start_run(run_name="ARIMA"):
     joblib.dump(model, model_path)
     mlflow.log_artifact(model_path, artifact_path="model")
 
-# ================================================================
-# -------------------------- PLOT RESULT --------------------------
-# ================================================================
+# PLOT RESULT for this model...
 plt.figure(figsize=(12, 6))
 plt.plot(train["Date"], y_train, label="Train", color="black")
 plt.plot(test["Date"], y_test, label="Actual", color="gray")
