@@ -1,0 +1,48 @@
+# Core Python packages
+python=3.12.11
+pip=25.2
+setuptools=80.9.0
+
+# Data and numerical processing
+numpy
+pandas
+scikit-learn==1.3.2
+ml-dtypes
+
+# Time series & forecasting
+statsmodels
+prophet
+
+# Model serialization
+joblib
+
+# Experiment tracking
+mlflow==3.4.0
+comet-ml==3.54.2
+wandb
+
+# Web app
+Flask
+fastapi==0.119.0
+uvicorn==0.37.0
+
+# Plotting
+matplotlib
+
+# System monitoring
+psutil
+
+# Utilities
+python-dotenv
+pyyaml
+rich
+pywin32
+pyperclip
+
+# Networking / API
+docker
+authlib
+anyio
+h11
+httptools
+sniffio
