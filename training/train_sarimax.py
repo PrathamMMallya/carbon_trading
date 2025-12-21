@@ -1,6 +1,4 @@
-# ================================================================
-# train_sarimax.py — SARIMAX + MLflow + Comet + WandB (FULL, FIXED)
-# ================================================================
+# this is still issue train_sarimax.py — SARIMAX + MLflow + Comet + WandB  (problem is still there)
 
 import pandas as pd
 import numpy as np
@@ -13,7 +11,6 @@ import matplotlib.pyplot as plt
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
-# ---------------- COMET ----------------
 from comet_ml import Experiment
 with open("../comet-config/comet.json", "r") as f:
     comet_cfg = json.load(f)
@@ -24,25 +21,20 @@ experiment = Experiment(
     workspace=comet_cfg["workspace"]
 )
 
-# ---------------- W&B ----------------
 import wandb
 wandb.init(project="carbon-price-forecasting", name="SARIMAX_Run")
 
-# ---------------- MLflow ----------------
 import mlflow
 mlflow.set_tracking_uri("file:../mlruns")
 mlflow.set_experiment("Carbon_Forecasting_SARIMAX")
 
-# ---------------- Load Data ----------------
 df = pd.read_csv("../data/carbon_trading_dataset.csv")
 
 df["Date"] = pd.to_datetime(df["Date"])
 df = df.sort_values("Date")
 
-# ✅ KEEP ONLY TARGET (numeric-safe)
 df = df[["Date", "Carbon_Price_USD_per_t"]]
 
-# ✅ SAFE MONTHLY RESAMPLING (Pandas 2.x compatible)
 df = (
     df.set_index("Date")
       .resample("M")
@@ -52,11 +44,9 @@ df = (
 
 y = df["Carbon_Price_USD_per_t"]
 
-# ---------------- Train-Test Split ----------------
 split = int(len(df) * 0.8)
 y_train, y_test = y.iloc[:split], y.iloc[split:]
 
-# ---------------- Metrics ----------------
 def metrics(y_true, y_pred):
     return (
         np.sqrt(mean_squared_error(y_true, y_pred)),
@@ -64,7 +54,6 @@ def metrics(y_true, y_pred):
         mean_squared_error(y_true, y_pred)
     )
 
-# ---------------- Train ----------------
 with mlflow.start_run(run_name="SARIMAX"):
 
     model = SARIMAX(
@@ -78,7 +67,6 @@ with mlflow.start_run(run_name="SARIMAX"):
     y_pred = model.forecast(steps=len(y_test))
     rmse, mae, mse = metrics(y_test, y_pred)
 
-    # ---- Params ----
     params = {
         "p": 2, "d": 1, "q": 2,
         "P": 1, "D": 1, "Q": 1,
@@ -87,12 +75,10 @@ with mlflow.start_run(run_name="SARIMAX"):
     mlflow.log_params(params)
     experiment.log_parameters(params)
 
-    # ---- Metrics ----
     mlflow.log_metrics({"RMSE": rmse, "MAE": mae, "MSE": mse})
     experiment.log_metrics({"RMSE": rmse, "MAE": mae, "MSE": mse})
     wandb.log({"Final_RMSE": rmse, "Final_MAE": mae, "Final_MSE": mse})
 
-    # ---- Step-wise Metrics ----
     for i in range(1, len(y_pred) + 1):
         rmse_i, mae_i, mse_i = metrics(y_test.iloc[:i], y_pred.iloc[:i])
 
@@ -106,7 +92,6 @@ with mlflow.start_run(run_name="SARIMAX"):
         experiment.log_metric("MAE_over_time", mae_i, step=i)
         experiment.log_metric("MSE_over_time", mse_i, step=i)
 
-    # ---- Resource Monitoring ----
     for step in range(20):
         cpu = psutil.cpu_percent(interval=0.1)
         ram = psutil.virtual_memory().percent
@@ -117,7 +102,6 @@ with mlflow.start_run(run_name="SARIMAX"):
 
         time.sleep(0.4)
 
-    # ---- Save Model ----
     MODEL_DIR = r"C:\Users\prath\Downloads\MLOps_Backend\models"
     os.makedirs(MODEL_DIR, exist_ok=True)
 
@@ -125,7 +109,6 @@ with mlflow.start_run(run_name="SARIMAX"):
     joblib.dump(model, model_path)
     mlflow.log_artifact(model_path, "model")
 
-# ---------------- Plot ----------------
 plt.figure(figsize=(12, 6))
 plt.plot(df["Date"].iloc[:split], y_train, label="Train")
 plt.plot(df["Date"].iloc[split:], y_test, label="Actual")
@@ -142,4 +125,4 @@ experiment.log_figure(figure=plt)
 wandb.log({"Forecast_Plot": wandb.Image(plot_path)})
 plt.close()
 
-print("✅ SARIMAX TRAINING COMPLETE")
+print(" SARIMAX TRAINING COMPLETE")
