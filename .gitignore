@@ -8,3 +8,14 @@ training/.cometml-runs/
 
 # MLflow
 mlruns/
+
+# Virtual Environments
+venv/
+.env
+
+# Airflow
+airflow/logs/
+airflow/dags/__pycache__/
+airflow/airflow.db
+airflow/airflow.cfg
+airflow/simple_auth_manager_passwords.json

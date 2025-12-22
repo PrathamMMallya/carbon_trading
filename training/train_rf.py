@@ -12,7 +12,14 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 from comet_ml import Experiment
-with open("../comet-config/comet.json", "r") as f:
+from pathlib import Path
+import json
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+COMET_CONFIG = PROJECT_ROOT / "comet-config" / "comet.json"
+DATA_DIR = PROJECT_ROOT / "data"
+
+with open(COMET_CONFIG, "r") as f:
     comet_cfg = json.load(f)
 
 experiment = Experiment(
@@ -28,7 +35,7 @@ import mlflow
 mlflow.set_tracking_uri("file:../mlruns")
 mlflow.set_experiment("Carbon_Forecasting_RF")
 
-df = pd.read_csv("../data/carbon_trading_dataset.csv")
+df = pd.read_csv(DATA_DIR / "carbon_trading_dataset.csv")
 
 df["Date"] = pd.to_datetime(df["Date"])
 df = df.sort_values("Date")
