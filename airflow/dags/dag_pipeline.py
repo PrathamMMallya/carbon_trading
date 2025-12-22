@@ -8,9 +8,7 @@ from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from airflow.utils.task_group import TaskGroup
 
-# -------------------------------------------------
-# AUTO-DETECT PROJECT ROOT (PORTABLE)
-# -------------------------------------------------
+# detect project root
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 PYTHON = (
@@ -33,9 +31,7 @@ default_args = {
     "retry_delay": pendulum.duration(minutes=5),
 }
 
-# -------------------------------------------------
-# DAG DEFINITION
-# -------------------------------------------------
+# dag definition
 with DAG(
     dag_id="carbon_trading_pipeline",
     description="ML pipeline for carbon trading data forecasting",
@@ -46,7 +42,7 @@ with DAG(
     tags=["carbon_trading", "ml"],
 ) as dag:
 
-    # ------------------ 1. CHECK DATA ------------------
+    # step 1: check data availability
     check_data = BashOperator(
         task_id="check_data",
         bash_command=f"""
@@ -59,14 +55,14 @@ with DAG(
         """
     )
 
-    # ------------------ 2. FEATURE ENGINEERING ------------------
+    # step 2: feature engineering
     feature_engineering = PythonOperator(
         task_id="feature_engineering",
         python_callable=run_script,
         op_args=["training/feature_engineering.py"],
     )
 
-    # ------------------ 3. TRAIN MODELS (PARALLEL) ------------------
+    # step 3: train models
     with TaskGroup("train_models") as train_models:
 
         train_arima = PythonOperator(
@@ -89,7 +85,7 @@ with DAG(
 
         [train_arima, train_prophet, train_rf]
 
-    # ------------------ 4. ARCHIVE OUTPUTS ------------------
+    # step 4: archive outputs
     archive_outputs = BashOperator(
         task_id="archive_outputs",
         bash_command=f"""
@@ -98,11 +94,11 @@ with DAG(
         """
     )
 
-    # ------------------ 5. PIPELINE COMPLETE ------------------
+    # final step: pipeline done
     pipeline_done = BashOperator(
         task_id="pipeline_done",
         bash_command="echo '✅ Carbon trading pipeline completed successfully'",
     )
 
-    # ------------------ DAG FLOW ------------------
+    # define dag flow
     check_data >> feature_engineering >> train_models >> archive_outputs >> pipeline_done
