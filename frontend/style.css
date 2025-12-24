@@ -25,12 +25,12 @@ body {
 .container {
   margin: 200px auto 10px auto;
   padding: 25px;
-  background: rgba(145, 143, 143, 0.65); /* Slightly more opaque for better readability */
+  background: rgba(145, 143, 143, 0.65);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.18); /* Subtle glass border */
+  border: 1px solid rgba(255, 255, 255, 0.18);
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -53,7 +53,7 @@ label {
   font-size: 16px;
   font-weight: 600;
   color: #ffffff;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Improves readability */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   white-space: nowrap; 
   text-align: right; 
   padding-right: 12px; 
@@ -62,7 +62,7 @@ label {
 /* Inputs & selects */
 input[type="date"],
 select {
-  padding: 10px 14px; /* Slightly larger for better touch targets */
+  padding: 10px 14px;
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   outline: none;
@@ -72,7 +72,6 @@ select {
   transition: all 0.3s ease;
 }
 
-/* Focus states for better accessibility */
 input[type="date"]:focus,
 select:focus {
   border-color: rgba(40, 167, 69, 0.8);
@@ -80,7 +79,6 @@ select:focus {
   background: rgba(255, 255, 255, 1);
 }
 
-/* Button container */
 .button-container {
   display: flex;
   flex-direction: column;
@@ -88,10 +86,9 @@ select:focus {
   margin-top: 25px;
 }
 
-/* Predict button */
 button {
   padding: 12px 30px;
-  background-color: rgba(40, 167, 69, 0.85); /* Slightly more opaque */
+  background-color: rgba(40, 167, 69, 0.85);
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -102,26 +99,23 @@ button {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Hover effect */
 button:hover {
   background-color: rgba(33, 136, 56, 0.95);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
-/* Active/pressed state */
 button:active {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Output box */
 #output {
   margin: 20px auto 0;
   padding: 16px;
   width: 80%;
   max-width: 600px;
-  background: rgba(0, 0, 0, 0.5); /* Slightly more opaque */
+  background: rgba(0, 0, 0, 0.5);
   color: #fff;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -131,7 +125,6 @@ button:active {
   font-size: 15px;
 }
 
-/* Responsive design for mobile devices */
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
@@ -158,4 +151,3 @@ button:active {
     width: 90%;
   }
 }
-

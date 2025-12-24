@@ -2,7 +2,8 @@
 <html>
 <head>
   <title>Carbon Price Forecast</title>
-  <link rel="stylesheet" href="style.css">
+  <!-- Note: static folder reference -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 <section class="header">
@@ -11,15 +12,18 @@
 </section>
 
 <div class="container">
+  <div>
+    <label class="dateday">Select Date</label>
+    <input type="date" id="date">
+  </div>
 
-  <label class="dateday">Select Date</label>
-  <input type="date" id="date">
-
-  <label class="Mode">Mode</label>
-  <select id="mode" onchange="toggleModel()">
-    <option value="manual">Manual</option>
-    <option value="auto">Auto Select</option>
-  </select>
+  <div>
+    <label class="Mode">Mode</label>
+    <select id="mode" onchange="toggleModel()">
+      <option value="manual">Manual</option>
+      <option value="auto">Auto Select</option>
+    </select>
+  </div>
 
   <div id="modelDiv">
     <label>Model</label>
@@ -30,6 +34,7 @@
     </select>
   </div>
 </div>
+
 <div class="button-container">
   <button onclick="predict()">Predict</button>
   <pre id="output"></pre>
@@ -61,6 +66,5 @@ function predict() {
   });
 }
 </script>
-
 </body>
 </html>

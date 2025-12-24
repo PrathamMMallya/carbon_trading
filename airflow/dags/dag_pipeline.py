@@ -2,39 +2,59 @@ from pathlib import Path
 import subprocess
 import pendulum
 import os
-
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from airflow.utils.task_group import TaskGroup
 
-# detect project root
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+# =========================================================
+# Docker-safe project root
+# =========================================================
+PROJECT_ROOT = Path("/opt/project")
+PYTHON = "python"  # container Python
 
-PYTHON = (
-    PROJECT_ROOT / "venv" / "Scripts" / "python.exe"
-    if (PROJECT_ROOT / "venv" / "Scripts").exists()
-    else PROJECT_ROOT / "venv" / "bin" / "python"
-)
-
+# =========================================================
+# Helper to run training scripts with logging
+# =========================================================
 def run_script(relative_path):
     env = os.environ.copy()
     env["WANDB_MODE"] = "disabled"
     env["WANDB_SILENT"] = "true"
     env["PROJECT_ROOT"] = str(PROJECT_ROOT)
-    script_path = PROJECT_ROOT / relative_path
-    subprocess.run([str(PYTHON), str(script_path)], check=True, env=env,)
 
+    script_path = PROJECT_ROOT / relative_path
+
+    print(f"Running script: {script_path}")
+    if not script_path.exists():
+        raise FileNotFoundError(f"Script not found: {script_path}")
+
+    result = subprocess.run(
+        [PYTHON, str(script_path)],
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    print("stdout:\n", result.stdout)
+    print("stderr:\n", result.stderr)
+
+    if result.returncode != 0:
+        raise RuntimeError(f"Script {relative_path} failed with exit code {result.returncode}")
+
+# =========================================================
+# DAG defaults
+# =========================================================
 default_args = {
     "owner": "carbon_trading",
     "retries": 1,
     "retry_delay": pendulum.duration(minutes=5),
 }
 
-# dag definition
+# =========================================================
+# DAG definition
+# =========================================================
 with DAG(
     dag_id="carbon_trading_pipeline",
-    description="ML pipeline for carbon trading data forecasting",
+    description="ML pipeline for carbon trading forecasting",
     default_args=default_args,
     start_date=pendulum.datetime(2025, 1, 1, tz="UTC"),
     schedule="@daily",
@@ -42,11 +62,13 @@ with DAG(
     tags=["carbon_trading", "ml"],
 ) as dag:
 
-    # step 1: check data availability
+    # -----------------------------------------------------
+    # Step 1: Check data availability
+    # -----------------------------------------------------
     check_data = BashOperator(
         task_id="check_data",
-        bash_command=f"""
-        if [ -z "$(ls {PROJECT_ROOT}/data)" ]; then
+        bash_command="""
+        if [ -z "$(ls /opt/project/data 2>/dev/null)" ]; then
             echo "❌ data/ directory empty or missing"
             exit 1
         else
@@ -55,14 +77,18 @@ with DAG(
         """
     )
 
-    # step 2: feature engineering
+    # -----------------------------------------------------
+    # Step 2: Feature engineering
+    # -----------------------------------------------------
     feature_engineering = PythonOperator(
         task_id="feature_engineering",
         python_callable=run_script,
         op_args=["training/feature_engineering.py"],
     )
 
-    # step 3: train models
+    # -----------------------------------------------------
+    # Step 3: Train models
+    # -----------------------------------------------------
     with TaskGroup("train_models") as train_models:
 
         train_arima = PythonOperator(
@@ -83,22 +109,31 @@ with DAG(
             op_args=["training/train_rf.py"],
         )
 
-        [train_arima, train_prophet, train_rf]
+        # Sequential execution
+        train_arima >> train_prophet >> train_rf
 
-    # step 4: archive outputs
+    # -----------------------------------------------------
+    # Step 4: Archive outputs
+    # -----------------------------------------------------
     archive_outputs = BashOperator(
         task_id="archive_outputs",
-        bash_command=f"""
-        mkdir -p {PROJECT_ROOT}/outputs/$(date +%Y%m%d)
-        cp -r {PROJECT_ROOT}/models/* {PROJECT_ROOT}/outputs/$(date +%Y%m%d)/ || true
+        bash_command="""
+        DATE=$(date +%Y%m%d)
+        mkdir -p /opt/project/outputs/$DATE
+        cp -r /opt/project/models/* /opt/project/outputs/$DATE/ || true
+        echo "✅ Models archived to outputs/$DATE"
         """
     )
 
-    # final step: pipeline done
+    # -----------------------------------------------------
+    # Step 5: Pipeline done
+    # -----------------------------------------------------
     pipeline_done = BashOperator(
         task_id="pipeline_done",
         bash_command="echo '✅ Carbon trading pipeline completed successfully'",
     )
 
-    # define dag flow
+    # -----------------------------------------------------
+    # DAG flow
+    # -----------------------------------------------------
     check_data >> feature_engineering >> train_models >> archive_outputs >> pipeline_done

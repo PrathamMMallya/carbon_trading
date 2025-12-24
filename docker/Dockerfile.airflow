@@ -1,0 +1,16 @@
+FROM apache/airflow:2.9.3
+
+USER root
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    git \
+    curl \
+    && apt-get clean
+
+USER airflow
+
+RUN pip install --no-cache-dir \
+    pandas numpy matplotlib scikit-learn statsmodels prophet \
+    mlflow comet-ml wandb psutil joblib flask
