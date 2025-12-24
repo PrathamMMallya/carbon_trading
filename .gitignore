@@ -8,3 +8,6 @@ training/.cometml-runs/
 
 # MLflow
 mlruns/
+
+# Outputs / artifacts
+outputs/
