@@ -1,6 +1,4 @@
-# ================================================================
 # train_prophet.py — Prophet + MLflow + Comet + WandB (FULL, FIXED)
-# ================================================================
 
 import pandas as pd
 import numpy as np
@@ -12,10 +10,15 @@ import matplotlib.pyplot as plt
 
 from prophet import Prophet
 from sklearn.metrics import mean_squared_error, mean_absolute_error
-
-# ---------------- COMET ----------------
+from pathlib import Path
+import json
+# this is comet
 from comet_ml import Experiment
-with open("../comet-config/comet.json", "r") as f:
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+COMET_CONFIG = PROJECT_ROOT / "comet-config" / "comet.json"
+DATA_DIR = PROJECT_ROOT / "data"
+
+with open(COMET_CONFIG, "r") as f:
     comet_cfg = json.load(f)
 
 experiment = Experiment(
@@ -24,25 +27,24 @@ experiment = Experiment(
     workspace=comet_cfg["workspace"]
 )
 
-# ---------------- W&B ----------------
+# weights and b
 import wandb
 wandb.init(project="carbon-price-forecasting", name="Prophet_Run")
 
-# ---------------- MLflow ----------------
+# mflow part
 import mlflow
 mlflow.set_tracking_uri("file:../mlruns")
 mlflow.set_experiment("Carbon_Forecasting_Prophet")
 
-# ---------------- Load Data ----------------
-df = pd.read_csv("../data/carbon_trading_dataset.csv")
+df = pd.read_csv(DATA_DIR / "carbon_trading_dataset.csv")
 
 df["Date"] = pd.to_datetime(df["Date"])
 df = df.sort_values("Date")
 
-# ✅ KEEP ONLY NUMERIC TARGET BEFORE RESAMPLING
+#  KEEP ONLY NUMERIC TARGET BEFORE RESAMPLING , this is important
 df = df[["Date", "Carbon_Price_USD_per_t"]]
 
-# ✅ SAFE RESAMPLING (Pandas 2.x compatible)
+#  SAFE RESAMPLING (Pandas 2.x compatible) or else will  get errors..
 df = (
     df.set_index("Date")
       .resample("M")
@@ -56,11 +58,9 @@ df = df.rename(columns={
     "Carbon_Price_USD_per_t": "y"
 })
 
-# ---------------- Train / Test Split ----------------
 split = int(len(df) * 0.8)
 train, test = df.iloc[:split], df.iloc[split:]
 
-# ---------------- Metrics ----------------
 def metrics(y_true, y_pred):
     return (
         np.sqrt(mean_squared_error(y_true, y_pred)),
@@ -139,4 +139,4 @@ experiment.log_figure(figure=plt)
 wandb.log({"Forecast_Plot": wandb.Image(plot_path)})
 plt.close()
 
-print("✅ PROPHET TRAINING COMPLETE")
+print(" PROPHET TRAINING COMPLETE")
