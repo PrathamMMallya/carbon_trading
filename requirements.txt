@@ -1,7 +1,7 @@
 # Data and numerical processing
-numpy
+numpy==1.26.4
 pandas
-scikit-learn==1.3.2
+scikit-learn==1.4.2
 ml-dtypes
 
 # Time series & forecasting
