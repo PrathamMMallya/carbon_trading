@@ -48,7 +48,7 @@ import mlflow
 mlflow.set_tracking_uri("file:../mlruns")
 mlflow.set_experiment("Carbon_Forecasting_ARIMA")
 
-file_path = DATA_DIR / "carbon_trading_dataset.csv"
+file_path = DATA_DIR / "raw" / "carbon_trading_dataset.csv"
 df = pd.read_csv(file_path)
 
 df["Date"] = pd.to_datetime(df["Date"])
@@ -132,7 +132,7 @@ with mlflow.start_run(run_name="ARIMA"):
         time.sleep(0.4)
 
 
-    MODEL_DIR = r"C:\Users\prath\Downloads\MLOps_Backend\models"
+    MODEL_DIR = PROJECT_ROOT / "models"
     os.makedirs(MODEL_DIR, exist_ok=True)
 
     model_path = os.path.join(MODEL_DIR, "arima.pkl")

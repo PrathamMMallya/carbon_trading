@@ -36,7 +36,7 @@ psutil
 python-dotenv
 pyyaml
 rich
-pywin32
+# pywin32 - Removed for Linux deployment
 pyperclip
 
 # Networking / API
@@ -46,3 +46,4 @@ anyio
 h11
 httptools
 sniffio
+gunicorn

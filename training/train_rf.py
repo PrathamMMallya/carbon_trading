@@ -35,7 +35,7 @@ import mlflow
 mlflow.set_tracking_uri("file:../mlruns")
 mlflow.set_experiment("Carbon_Forecasting_RF")
 
-df = pd.read_csv(DATA_DIR / "carbon_trading_dataset.csv")
+df = pd.read_csv(DATA_DIR / "raw" / "carbon_trading_dataset.csv")
 
 df["Date"] = pd.to_datetime(df["Date"])
 df = df.sort_values("Date")
@@ -118,7 +118,7 @@ with mlflow.start_run(run_name="RandomForest"):
 
         time.sleep(0.4)
 
-    MODEL_DIR = r"C:\Users\prath\Downloads\MLOps_Backend\models"
+    MODEL_DIR = PROJECT_ROOT / "models"
     os.makedirs(MODEL_DIR, exist_ok=True)
 
     model_path = os.path.join(MODEL_DIR, "rf.pkl")

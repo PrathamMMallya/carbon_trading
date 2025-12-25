@@ -26,16 +26,29 @@ mlflow.set_tracking_uri("file:./mlruns")
 mlflow.set_experiment("Carbon_Forecasting_Inference")
 
 # Comet
-with open("./comet-config/comet.json") as f:
-    comet_cfg = json.load(f)
+# Comet
+api_key = os.getenv("COMET_API_KEY")
+project_name = os.getenv("COMET_PROJECT_NAME")
+workspace = os.getenv("COMET_WORKSPACE")
+
+if not api_key and os.path.exists("./comet-config/comet.json"):
+    with open("./comet-config/comet.json") as f:
+        comet_cfg = json.load(f)
+        api_key = comet_cfg["api_key"]
+        project_name = comet_cfg["project_name"]
+        workspace = comet_cfg["workspace"]
+
 experiment = Experiment(
-    api_key=comet_cfg["api_key"],
-    project_name=comet_cfg["project_name"],
-    workspace=comet_cfg["workspace"],
+    api_key=api_key,
+    project_name=project_name,
+    workspace=workspace,
     auto_output_logging="full"
 )
 
 # W&B
+wandb_key = os.getenv("WANDB_API_KEY")
+if wandb_key:
+    wandb.login(key=wandb_key)
 wandb.init(project="carbon-price-forecasting", name="Inference_Run", reinit=True)
 
 # Load models
