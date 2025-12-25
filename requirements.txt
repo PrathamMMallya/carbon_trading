@@ -1,7 +1,7 @@
 # Core Python packages
-python=3.12.11
-pip=25.2
-setuptools=80.9.0
+python==3.12.11
+pip==25.2
+setuptools==80.9.0
 
 # Data and numerical processing
 numpy
