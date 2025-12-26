@@ -17,6 +17,21 @@ from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # this is comet part
+# --------------------------------------------------
+# DRIFT CHECK (RETRAIN ONLY IF DRIFT EXISTS)
+# --------------------------------------------------
+drift_flag_path = "../monitoring/drift_flag.txt"
+
+if os.path.exists(drift_flag_path):
+    with open(drift_flag_path, "r") as f:
+        status = f.read().strip()
+
+    if status != "DRIFT":
+        print("No data drift detected — skipping ARIMA retraining.")
+        exit(0)
+else:
+    print("Drift flag not found — skipping retraining.")
+    exit(0)
 
 from comet_ml import Experiment
 
@@ -155,3 +170,9 @@ plt.close()
 print("\n============================")
 print("ARIMA TRAINING COMPLETE")
 print("============================")
+
+if dataset_drift or drift_share > DRIFT_THRESHOLD:
+    print("⚠️ Drift detected — retraining triggered")
+    os.system("python training/train_arima.py")
+else:
+    print("✅ Data stable — no retraining needed")
