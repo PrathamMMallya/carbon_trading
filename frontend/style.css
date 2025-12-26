@@ -1,37 +1,153 @@
 body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  background-image: url("tree.jpg");      
+  background-repeat: no-repeat; 
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; 
+  color: #333;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
 }
 
+/* Header section */
+.header {
+  margin-top: 40px;
+  margin-bottom: 30px;
+  text-align: center;
+  font-size: 1.5em;
+  color: #545151;
+  font-weight: 600;
+}
+
+/* Main form container */
 .container {
-  width: 400px;
-  margin: 60px auto;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
+  margin: 200px auto 10px auto;
+  padding: 25px;
+  background: rgba(145, 143, 143, 0.65);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;  
+  gap: 12px 20px; 
+  max-width: 900px;
+  text-align: center;
+  color: #fff;
 }
 
+.container > div {
+  display: flex;
+  flex-direction: row; 
+  align-items: center;
+  gap: 10px; 
+}
+
+/* Labels */
 label {
-  display: block;
-  margin-top: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  white-space: nowrap; 
+  text-align: right; 
+  padding-right: 12px; 
 }
 
-input, select, button {
-  width: 100%;
-  margin-top: 5px;
-  padding: 8px;
+/* Inputs & selects */
+input[type="date"],
+select {
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  outline: none;
+  min-width: 150px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+}
+
+input[type="date"]:focus,
+select:focus {
+  border-color: rgba(40, 167, 69, 0.8);
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+  background: rgba(255, 255, 255, 1);
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;     
+  margin-top: 25px;
 }
 
 button {
-  margin-top: 20px;
-  background: #007bff;
-  color: white;
+  padding: 12px 30px;
+  background-color: rgba(40, 167, 69, 0.85);
+  color: #fff;
   border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-pre {
-  margin-top: 15px;
-  background: #eee;
-  padding: 10px;
+button:hover {
+  background-color: rgba(33, 136, 56, 0.95);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+#output {
+  margin: 20px auto 0;
+  padding: 16px;
+  width: 80%;
+  max-width: 600px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: left;
+  overflow-x: auto;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 20px;
+  }
+  
+  .container > div {
+    align-items: stretch;
+  }
+  
+  input[type="date"],
+  select {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .header {
+    font-size: 1.2em;
+    margin-top: 20px;
+  }
+  
+  #output {
+    width: 90%;
+  }
 }

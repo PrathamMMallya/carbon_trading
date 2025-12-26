@@ -1,5 +1,3 @@
-
-
 Company_ID,Industry_Type,Date,Energy_Demand_MWh,Fuel_Type,Emission_Produced_tCO2,Emission_Allowance_tCO2,Carbon_Price_USD_per_t,Transaction_Type,Credits_Traded_tCO2,Verification_Status,Compliance_Cost_USD,Optimization_Scenario,Carbon_Cost_Savings_USD,Target_Trade_Action
 C062,Steel,2024-06-07,1444.72,Mixed Fuel,761.54,601.54,22.25,Buy,94,Disputed,8497.76,Price_Surge,541.97,1
 C084,Energy,2024-07-18,1933.84,Renewable,1353.1,1439.1,33.7,Buy,63,Disputed,8862.97,Price_Surge,2833.26,1
