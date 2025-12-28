@@ -150,7 +150,7 @@ def predict():
             if model_name=="prophet":
                 preds = model.predict(pd.DataFrame({"ds": future}))["yhat"].tolist()
             elif model_name=="rf":
-                X = np.column_stack((future.year, future.month))
+                X = pd.DataFrame({"year": future.year, "month": future.month})
                 preds = model.predict(X).tolist()
                 generate_rf_feature_plot(model,run_label)
     except Exception as e:
