@@ -15,20 +15,31 @@ from comet_ml import Experiment
 from pathlib import Path
 import json
 
+from dotenv import load_dotenv
+load_dotenv()
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 COMET_CONFIG = PROJECT_ROOT / "comet-config" / "comet.json"
 DATA_DIR = PROJECT_ROOT / "data"
 
-with open(COMET_CONFIG, "r") as f:
-    comet_cfg = json.load(f)
-
-experiment = Experiment(
-    api_key=comet_cfg["api_key"],
-    project_name=comet_cfg["project_name"],
-    workspace=comet_cfg["workspace"]
-)
+if os.path.exists(COMET_CONFIG):
+    with open(COMET_CONFIG, "r") as f:
+        comet_cfg = json.load(f)
+    experiment = Experiment(
+        api_key=comet_cfg.get("api_key"),
+        project_name=comet_cfg.get("project_name"),
+        workspace=comet_cfg.get("workspace")
+    )
+else:
+    experiment = Experiment(api_key=os.getenv("COMET_API_KEY"))
 
 import wandb
+wandb_key = os.getenv("WANDB_API_KEY")
+if not wandb_key:
+    os.environ["WANDB_MODE"] = "disabled"
+    print("No WANDB_API_KEY found. WandB disabled.")
+else:
+    wandb.login(key=wandb_key)
 wandb.init(project="carbon-price-forecasting", name="RF_Run")
 
 import mlflow
