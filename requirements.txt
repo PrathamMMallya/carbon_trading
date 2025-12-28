@@ -1,5 +1,6 @@
 # Data and numerical processing
-numpy==1.26.4
+
+numpy>=1.26.0
 pandas
 scikit-learn==1.4.2
 ml-dtypes
